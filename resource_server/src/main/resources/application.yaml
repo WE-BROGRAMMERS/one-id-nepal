@@ -14,7 +14,7 @@ spring:
   jpa:
     show_sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
   security:
     oauth2:
@@ -29,7 +29,7 @@ server:
 logging:
   level:
     org.springframework.security: DEBUG
-    
+
 springdoc:
   api-docs:
     path: /v1/api-docs
