@@ -1,12 +1,21 @@
-# Multi-stage build for Resource Server
-FROM maven:3.9-eclipse-temurin-21 AS builder
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+FROM maven:3.9-eclipse-temurin-17 AS builder
 
-FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=builder /app/target/resource-server-0.0.1-SNAPSHOT.jar app.jar
+
+COPY pom.xml .
+
+RUN mvn dependency:go-offline
+
+COPY src ./src
+
+RUN mvn clean package -Dmaven.test.skip=true
+
+FROM eclipse-temurin:17-jre-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/target/*.jar app.jar
+
 EXPOSE 8090
-ENTRYPOINT ["java", "-jar", "app.jar"]
 
+ENTRYPOINT ["java", "-jar", "app.jar"]

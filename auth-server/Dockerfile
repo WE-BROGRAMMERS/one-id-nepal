@@ -1,12 +1,21 @@
-# Multi-stage build for Authorization Server
 FROM maven:3.9-eclipse-temurin-17 AS builder
+
 WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+
+COPY pom.xml .
+
+RUN mvn dependency:go-offline
+
+COPY src ./src
+
+RUN mvn clean package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:17-jre-alpine
-WORKDIR /app
-COPY --from=builder /app/target/authorization-server-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 9000
-ENTRYPOINT ["java", "-jar", "app.jar"]
 
+WORKDIR /app
+
+COPY --from=builder /app/target/*.jar app.jar
+
+EXPOSE 9000
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
