@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Authorize ' + ${clientName} + ' — OneIDNepal'">Authorize App — OneIDNepal</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nagarik: {
+                            blue:   '#1A3A6B',
+                            sky:    '#2563EB',
+                            light:  '#EFF6FF',
+                            accent: '#F59E0B',
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    keyframes: {
+                        fadeUp: { '0%': { opacity: 0, transform: 'translateY(16px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } }
+                    },
+                    animation: { 'fade-up': 'fadeUp 0.4s ease both' }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        .bg-gov-pattern {
+            background-color: #1A3A6B;
+            background-image:
+                    radial-gradient(circle at 15% 85%, rgba(37,99,235,0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 85% 15%, rgba(245,158,11,0.12) 0%, transparent 50%);
+        }
+
+        .scope-row {
+            transition: background 0.15s ease;
+        }
+        .scope-row:hover { background: #f0f7ff; }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+            transition: all 0.2s ease;
+        }
+        .btn-approve:hover {
+            background: linear-gradient(135deg, #15803D 0%, #166534 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(22,163,74,0.35);
+        }
+        .btn-deny {
+            transition: all 0.2s ease;
+        }
+        .btn-deny:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Scope icon mapping via data attribute */
+        .scope-icon { font-size: 1.1rem; }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gov-pattern flex flex-col">
+
+<!-- ─── Top Gov Bar ─────────────────────────────────────── -->
+<header class="bg-nagarik-blue border-b border-blue-800">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-nagarik-accent rounded-full flex items-center justify-center shadow">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18L20 8.09v7.82L12 20l-8-4.09V8.09L12 4.18z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-white font-bold text-sm leading-tight">OneIDNepal</p>
+                <p class="text-blue-300 text-xs">Government of Nepal — Digital Identity</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-blue-300">
+            <svg class="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 13l-3-3 1.4-1.4L10 11.2l5.6-5.6L17 7l-7 7z"/>
+            </svg>
+            Verified OAuth2 Session
+        </div>
+    </div>
+</header>
+
+<!-- ─── Main ─────────────────────────────────────────────── -->
+<main class="flex-1 flex items-center justify-center p-4 py-10">
+    <div class="w-full max-w-lg animate-fade-up">
+
+        <!-- Card -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+            <!-- Card Top: App Identity -->
+            <div class="bg-gradient-to-br from-nagarik-blue to-blue-800 px-8 py-7 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white opacity-5 rounded-full"></div>
+                <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-nagarik-accent opacity-10 rounded-full"></div>
+
+                <div class="relative z-10 flex items-center gap-5">
+                    <!-- OneIDNepal avatar -->
+                    <div class="flex flex-col items-center gap-1.5">
+                        <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-8 h-8 text-nagarik-blue" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                            </svg>
+                        </div>
+                        <span class="text-blue-200 text-xs font-medium">OneIDNepal</span>
+                    </div>
+
+                    <!-- Connection arrow -->
+                    <div class="flex-1 flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 w-full">
+                            <div class="flex-1 h-px bg-blue-400 opacity-60"></div>
+                            <div class="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shadow">
+                                <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 h-px bg-blue-400 opacity-60"></div>
+                        </div>
+                        <span class="text-blue-300 text-xs">requesting access</span>
+                    </div>
+
+                    <!-- Client App avatar -->
+                    <div class="flex flex-col items-center gap-1.5">
+                        <div class="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                            <span class="text-white font-black text-2xl leading-none">e</span>
+                        </div>
+                        <span class="text-blue-200 text-xs font-medium" th:text="${clientName}">eSewa</span>
+                    </div>
+                </div>
+
+                <div class="relative z-10 mt-5 text-center">
+                    <h1 class="text-white text-lg font-bold">
+                        <span th:text="${clientName}">eSewa</span>
+                        <span class="font-normal text-blue-200"> wants to access your account</span>
+                    </h1>
+                    <p class="text-blue-300 text-xs mt-1">
+                        Make sure you trust this application before approving
+                    </p>
+                </div>
+            </div>
+
+            <!-- Permissions List -->
+            <div class="px-8 pt-6 pb-4">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    Permissions Requested
+                </p>
+
+                <div class="rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
+                    <div th:each="entry : ${scopeClaims}"
+                         class="scope-row flex items-start gap-4 px-4 py-3.5">
+
+                        <!-- Scope icon (color-coded by scope key) -->
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                             th:classappend="${entry.key == 'openid'} ? 'bg-blue-100' :
+                                   (${entry.key == 'profile'} ? 'bg-purple-100' :
+                                   (${entry.key == 'email'} ? 'bg-yellow-100' :
+                                   (${entry.key == 'phone'} ? 'bg-green-100' : 'bg-gray-100')))">
+                            <!-- openid icon -->
+                            <svg th:if="${entry.key == 'openid'}" class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                            </svg>
+                            <!-- profile icon -->
+                            <svg th:if="${entry.key == 'profile'}" class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            <!-- email icon -->
+                            <svg th:if="${entry.key == 'email'}" class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                            </svg>
+                            <!-- phone icon -->
+                            <svg th:if="${entry.key == 'phone'}" class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.01l-2.2 2.2z"/>
+                            </svg>
+                            <!-- fallback icon -->
+                            <svg th:unless="${entry.key == 'openid' or entry.key == 'profile' or entry.key == 'email' or entry.key == 'phone'}"
+                                 class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                            </svg>
+                        </div>
+
+                        <!-- Scope label + claims -->
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-800 capitalize" th:text="${entry.key}">scope</p>
+                            <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                                <th:block th:each="claim, iter : ${entry.value}">
+                                    <span th:text="${claim}">claim</span><span th:unless="${iter.last}">, </span>
+                                </th:block>
+                            </p>
+                        </div>
+
+                        <!-- Checkmark -->
+                        <svg class="w-4 h-4 text-green-500 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Trust Note -->
+                <div class="mt-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-start gap-3">
+                    <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <p class="text-xs text-amber-800 leading-relaxed">
+                        Approving grants <strong th:text="${clientName}">this app</strong> access to the listed information from your OneIDNepal account.
+                        You can revoke this access at any time from your account settings.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="px-8 pb-7 pt-2">
+                <form method="post" th:action="@{/oauth2/authorize}" id="consentForm">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="client_id" th:value="${param.client_id[0]}"/>
+                    <input type="hidden" name="state" th:value="${state}"/>
+                    <th:block th:each="scope : ${scopes}">
+                        <input type="hidden" name="scope" th:value="${scope}"/>
+                    </th:block>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <!-- Deny -->
+                        <button
+                                type="submit"
+                                name="user_oauth_approval"
+                                value="false"
+                                class="btn-deny flex-1 border-2 border-gray-300 text-gray-600 font-semibold py-3 rounded-xl
+                       text-sm hover:border-red-300 hover:text-red-600 hover:bg-red-50 flex items-center justify-center gap-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Deny Access
+                        </button>
+
+                        <!-- Approve -->
+                        <button
+                                type="submit"
+                                name="user_oauth_approval"
+                                value="true"
+                                class="btn-approve flex-1 text-white font-semibold py-3 rounded-xl text-sm shadow-md
+                       flex items-center justify-center gap-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Approve Access
+                        </button>
+                    </div>
+                </form>
+
+                <p class="text-center text-xs text-gray-400 mt-4">
+                    🔒 Your data is protected under Nepal's Digital Privacy Act 2080
+                </p>
+            </div>
+        </div>
+
+        <!-- Security footer -->
+        <div class="mt-4 flex items-center justify-center gap-2 text-blue-200 text-xs">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 13l-3-3 1.4-1.4L10 11.2l5.6-5.6L17 7l-7 7z"/>
+            </svg>
+            256-bit SSL · Government of Nepal · OneIDNepal OAuth2 Authorization Server
+        </div>
+    </div>
+</main>
+
+<!-- ─── Footer ───────────────────────────────────────────── -->
+<footer class="text-center py-4 text-blue-300 text-xs border-t border-blue-800">
+    © <span th:text="${#dates.year(#dates.createNow())}">2025</span> OneIDNepal —
+    Ministry of Home Affairs, Nepal &nbsp;|&nbsp;
+    <a href="/privacy" class="hover:text-white underline">Privacy Policy</a> &nbsp;|&nbsp;
+    <a href="/help" class="hover:text-white underline">Help &amp; Support</a>
+</footer>
+
+</body>
+</html>
