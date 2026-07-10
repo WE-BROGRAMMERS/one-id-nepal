@@ -1,21 +1,14 @@
-package com.one_id_nepal.resource_server.person.entity;
+package com.one_id_nepal.resource_server.api.dto.response;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.one_id_nepal.resource_server.person.entity.Person;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
-@Entity
-@NoArgsConstructor
 @AllArgsConstructor
-public class Person {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+@NoArgsConstructor
+public class PersonInfoResponse {
     private String personId;
 
     private String firstName;
@@ -43,5 +36,19 @@ public class Person {
     private String temporaryMunicipality;
     private String temporaryWardNo;
     private boolean status;
-    private String userId;
+
+    public PersonInfoResponse(Person person) {
+        this.personId = person.getPersonId();
+        this.firstName = person.getFirstName();
+        this.middleName = person.getMiddleName();
+        this.lastName = person.getLastName();
+        this.nepaliFirstName = person.getNepaliFirstName();
+        this.nepaliMiddleName = person.getNepaliMiddleName();
+        this.nepaliLastName = person.getNepaliLastName();
+        this.dateOfBirth = person.getDateOfBirth();
+        this.gender = person.getGender();
+        this.bloodGroup = person.getBloodGroup();
+        this.martialStatus = person.getMartialStatus();
+        this.nationality = person.getNationality();
+    }
 }
