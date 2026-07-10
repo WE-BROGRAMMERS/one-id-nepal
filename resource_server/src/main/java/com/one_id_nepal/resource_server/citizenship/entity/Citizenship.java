@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Citizenship {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String citizenshipId;
     @Column(nullable = false, unique = true)
     private String citizenshipNumber;
