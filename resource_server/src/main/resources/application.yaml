@@ -20,6 +20,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
+#          issuer-uri: http://localhost:8080
           # issuer-uri: http://localhost:8080   # Your IdP's issuer
           jwk-set-uri: http://authorization-server:9000/oauth2/jwks
           jws-algorithms: RS256

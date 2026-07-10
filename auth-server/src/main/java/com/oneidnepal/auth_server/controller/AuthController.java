@@ -70,6 +70,7 @@ public class AuthController {
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
                 .claim("scope", scope)
+                .claim("userId", user.getId())
                 .build();
 
         String token = jwtEncoder.encode(
