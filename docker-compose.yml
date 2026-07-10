@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL for Auth Server
@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
     ports:
-      - "5433:5432"          # mapped to host to avoid conflict
+      - "5433:5432" # mapped to host to avoid conflict
     volumes:
       - postgres_auth_data:/var/lib/postgresql/data
     healthcheck:
@@ -31,7 +31,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
     ports:
-      - "5434:5432"          # different host port
+      - "5434:5432" # different host port
     volumes:
       - postgres_resource_data:/var/lib/postgresql/data
     healthcheck:
@@ -94,7 +94,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SERVER_PORT: 8090
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://authorization-server:9000/oauth2/jwks
       AUTH_SERVICE_URL: http://authorization-server:9000
     ports:
