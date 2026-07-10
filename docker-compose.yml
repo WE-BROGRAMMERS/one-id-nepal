@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for Auth Server
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: oneidnepal-auth-db
+    environment:
+      POSTGRES_DB: idp_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5433:5432"          # mapped to host to avoid conflict
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oneidnepal-network
+    restart: unless-stopped
+
+  # PostgreSQL for Resource Server
+  postgres-resource:
+    image: postgres:16-alpine
+    container_name: oneidnepal-resource-db
+    environment:
+      POSTGRES_DB: idp_resource_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5434:5432"          # different host port
+    volumes:
+      - postgres_resource_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oneidnepal-network
+    restart: unless-stopped
+
+  # Spring Cloud API Gateway
+  api-gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: Dockerfile
+    container_name: oneidnepal-api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      authorization-server:
+        condition: service_started
+      resource-server:
+        condition: service_started
+    networks:
+      - oneidnepal-network
+    restart: unless-stopped
+
+  # Authorization Server
+  authorization-server:
+    build:
+      context: ./auth-server
+      dockerfile: Dockerfile
+    container_name: oneidnepal-auth-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/idp_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_PORT: 9000
+      RESOURCE_SERVICE_URL: http://resource-server:8090
+    ports:
+      - "9000:9000"
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    networks:
+      - oneidnepal-network
+    restart: unless-stopped
+
+  # Resource Server
+  resource-server:
+    build:
+      context: ./resource_server
+      dockerfile: Dockerfile
+    container_name: oneidnepal-resource-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-resource:5432/idp_resource_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SERVER_PORT: 8090
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8080
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://authorization-server:9000/oauth2/jwks
+      AUTH_SERVICE_URL: http://authorization-server:9000
+    ports:
+      - "8090:8090"
+    depends_on:
+      postgres-resource:
+        condition: service_healthy
+      authorization-server:
+        condition: service_started
+    networks:
+      - oneidnepal-network
+    restart: unless-stopped
+
+  # Keycloak (optional)
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.3
+    container_name: oneidnepal-keycloak
+    command: ["start-dev", "--http-port=8081"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    networks:
+      - oneidnepal-network
+    restart: unless-stopped
+
+volumes:
+  postgres_auth_data:
+    driver: local
+  postgres_resource_data:
+    driver: local
+
+networks:
+  oneidnepal-network:
+    driver: bridge
