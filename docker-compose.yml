@@ -108,27 +108,6 @@ services:
       - oneidnepal-network
     restart: unless-stopped
 
-  # Keycloak (optional)
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.6.3
-    container_name: oneidnepal-keycloak
-    command: ["start-dev", "--http-port=8081"]
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HEALTH_ENABLED: "true"
-      KC_METRICS_ENABLED: "true"
-    ports:
-      - "8081:8081"
-    volumes:
-      - ./keycloak/import:/opt/keycloak/data/import
-    depends_on:
-      postgres-auth:
-        condition: service_healthy
-    networks:
-      - oneidnepal-network
-    restart: unless-stopped
-
 volumes:
   postgres_auth_data:
     driver: local

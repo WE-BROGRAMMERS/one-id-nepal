@@ -1,6 +1,7 @@
 package com.oneidnepal.auth_server.controller;
 
 import com.oneidnepal.auth_server.dto.LoginRequest;
+import com.oneidnepal.auth_server.entity.User;
 import com.oneidnepal.auth_server.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -55,25 +58,28 @@ public class AuthController {
                 ? "openid profile citizenship_data"
                 : request.getScope().trim();
 
-        Instant now = Instant.now();
-        Instant expiresAt = now.plus(Duration.ofMinutes(5));
-        JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
+        User user = userRepository.findByPhoneNumber(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plus(Duration.ofMinutes(5));
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
-                .issuedAt(now)
+                .subject(user.getPhoneNumber())
+                .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
-                .subject(authentication.getName())
-                .claim("scope", scope);
+                .claim("scope", scope)
+                .build();
 
-        userRepository.findByPhoneNumber(authentication.getName()).ifPresent(user -> claims.claim("uId", user.getId()));
-
-        String tokenValue = jwtEncoder.encode(
-                JwtEncoderParameters.from(claims.build())
+        String token = jwtEncoder.encode(
+                JwtEncoderParameters.from(claims)
         ).getTokenValue();
 
         return Map.of(
-                "access_token", tokenValue,
+                "access_token", token,
                 "token_type", "Bearer",
-                "expires_in", Duration.between(now, expiresAt).getSeconds(),
+                "expires_in", Duration.between(issuedAt, expiresAt).getSeconds(),
                 "scope", scope
         );
     }
