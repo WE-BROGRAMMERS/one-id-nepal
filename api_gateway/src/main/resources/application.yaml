@@ -1,3 +1,26 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: api_gateway
+
+  cloud:
+    gateway:
+
+      routes:
+        - id: authorization-server
+          uri: http://authorization-server:9000
+          predicates:
+            - Path=/oauth2/**,/connect/**,/.well-known/**,/login/**,/logout/**,/userinfo/**, /api/auth/logout
+          filters:
+            - PreserveHostHeader
+            - StripPrefix=0
+
+        - id: resource-server
+          uri: http://resource-server:8090
+          predicates:
+            - Path=/api/res/**
+          filters:
+            - PreserveHostHeader
+            - StripPrefix=0
