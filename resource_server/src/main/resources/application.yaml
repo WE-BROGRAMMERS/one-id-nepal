@@ -14,7 +14,7 @@ spring:
   jpa:
     show_sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
   security:
     oauth2:
@@ -23,8 +23,15 @@ spring:
           # issuer-uri: http://localhost:8080   # Your IdP's issuer
           jwk-set-uri: http://authorization-server:9000/oauth2/jwks
           jws-algorithms: RS256
+
 server:
   port: 8090
+
+app:
+  filepath:
+    windows: D:\\one_id_nepal\\
+    linux: /home/user/one_id_nepal/
+    mac: /Users/one_id_nepal/
 
 logging:
   level:
