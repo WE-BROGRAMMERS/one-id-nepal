@@ -3,18 +3,27 @@ package com.oneidnepal.auth_server.developer.service.impl;
 
 import com.oneidnepal.auth_server.developer.dto.AppResponse;
 import com.oneidnepal.auth_server.developer.dto.CreateAppRequest;
+import com.oneidnepal.auth_server.developer.dto.DevLoginRequest;
 import com.oneidnepal.auth_server.developer.dto.UpdateAppRequest;
 import com.oneidnepal.auth_server.developer.entity.ClientType;
 import com.oneidnepal.auth_server.developer.entity.DeveloperApp;
 import com.oneidnepal.auth_server.developer.repository.DeveloperAppRepository;
 import com.oneidnepal.auth_server.developer.service.DeveloperAppService;
+import com.oneidnepal.auth_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
@@ -27,6 +36,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 
@@ -41,6 +51,13 @@ public class DeveloperAppServiceImpl implements DeveloperAppService {
     private final DeveloperAppRepository developerAppRepository;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbcTemplate;
+
+    private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtEncoder jwtEncoder;
+
+    @Value("${spring.security.oauth2.authorizationserver.issuer:http://localhost:8080}")
+    private String issuer;
 
     private static final SecureRandom RNG = new SecureRandom();
     private static final char[] BASE62 =
@@ -183,6 +200,42 @@ public class DeveloperAppServiceImpl implements DeveloperAppService {
                         .clientSecret(passwordEncoder.encode(rawSecret))
                         .build());
         return toResponse(app, rawSecret);
+    }
+
+    @Override
+    public Map<String, Object> login(DevLoginRequest req) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getPhoneNumber(), req.getPassword())
+        );
+
+        String scope = req.getScope() == null || req.getScope().isBlank()
+                ? "openid profile"
+                : req.getScope().trim();
+
+        var user = userRepository.findByPhoneNumber(authentication.getName())
+                .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found"));
+
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plus(Duration.ofMinutes(5));
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .subject(user.getPhoneNumber())
+                .issuedAt(issuedAt)
+                .expiresAt(expiresAt)
+                .claim("scope", scope)
+                .claim("userId", user.getId())
+                .build();
+
+        String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+
+        return Map.of(
+                "access_token", token,
+                "token_type", "Bearer",
+                "expires_in", Duration.between(issuedAt, expiresAt).getSeconds(),
+                "expires_at", expiresAt.toString(),
+                "scope", scope
+        );
     }
 
     // ---- helpers ----

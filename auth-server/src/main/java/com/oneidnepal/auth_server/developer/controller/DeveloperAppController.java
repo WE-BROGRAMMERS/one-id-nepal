@@ -3,9 +3,9 @@ package com.oneidnepal.auth_server.developer.controller;
 
 import com.oneidnepal.auth_server.developer.dto.AppResponse;
 import com.oneidnepal.auth_server.developer.dto.CreateAppRequest;
+import com.oneidnepal.auth_server.developer.dto.DevLoginRequest;
 import com.oneidnepal.auth_server.developer.dto.UpdateAppRequest;
 import com.oneidnepal.auth_server.developer.service.DeveloperAppService;
-import com.oneidnepal.auth_server.dto.*;
 import com.oneidnepal.auth_server.entity.User;
 import com.oneidnepal.auth_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/developer/apps")
@@ -54,6 +55,11 @@ public class DeveloperAppController {
     @PostMapping("/{appId}/rotate-secret")
     public AppResponse rotateSecret(@PathVariable String appId, Authentication auth) {
         return developerAppService.rotateClientSecret(currentUserId(auth), appId);
+    }
+
+    @PostMapping("/login")
+    public Map<String, Object> login(@RequestBody DevLoginRequest req) {
+        return developerAppService.login(req);
     }
 
     private String currentUserId(Authentication auth) {

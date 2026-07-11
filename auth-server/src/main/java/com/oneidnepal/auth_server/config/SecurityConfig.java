@@ -107,6 +107,7 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/login",
                                 "/api/auth/logout",
+                                "/api/developer/apps/login",
                                 "/error",
                                 "/css/**", "/js/**"
                         ).permitAll()
