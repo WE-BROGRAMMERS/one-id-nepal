@@ -44,6 +44,8 @@ public class InitialDataConfig {
                 "6e01bfd2-0a12-43de-d123-777788889999"
         );
 
+        String defaultAvatarUrl = "https://static.vecteezy.com/system/resources/thumbnails/048/216/761/small/modern-male-avatar-with-black-hair-and-hoodie-illustration-free-png.png";
+
         for (int i = 0; i < userIds.size(); i++) {
             String userId = userIds.get(i);
 
@@ -65,7 +67,7 @@ public class InitialDataConfig {
             person.setBloodGroup("O+");
             person.setMartialStatus("Single");
             person.setNationality("Nepali");
-            person.setProfilePhoto(null);
+            person.setProfilePhoto(defaultAvatarUrl);
             person.setFatherName("DummyFather" + i);
             person.setNepaliFatherName("नेपालीबाबु" + i);
             person.setMotherName("DummyMother" + i);
