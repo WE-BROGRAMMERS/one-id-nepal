@@ -20,7 +20,7 @@ spring:
         - id: resource-server
           uri: http://resource-server:8090
           predicates:
-            - Path=/api/res/**
+            - Path=/api/res/person/**
           filters:
             - PreserveHostHeader
             - StripPrefix=0
