@@ -84,6 +84,8 @@ public class AuthorizationServerConfig {
                     .scope("openid")
                     .scope("profile")
                     .scope("citizenship_data")
+                    .scope("driving_license")
+                    .scope("nid_data")
 
 
                     .clientSettings(ClientSettings.builder()

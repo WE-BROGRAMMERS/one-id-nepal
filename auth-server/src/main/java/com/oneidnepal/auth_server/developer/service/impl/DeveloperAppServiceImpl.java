@@ -64,7 +64,7 @@ public class DeveloperAppServiceImpl implements DeveloperAppService {
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
     private static final Set<String> SELF_SERVICE_SCOPES = Set.of("openid", "profile", "email");
-    private static final Set<String> RESTRICTED_SCOPES = Set.of("citizenship_data", "driving_license");
+    private static final Set<String> RESTRICTED_SCOPES = Set.of("citizenship_data", "driving_license", "nid_data");
 
     @Override
     @Transactional

@@ -8,6 +8,6 @@ import lombok.Data;
 public class LoginRequest {
     private String phoneNumber;
     private String password;
-    private String scope;
+    private String clientId;
 }
 
