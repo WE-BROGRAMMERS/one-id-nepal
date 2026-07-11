@@ -6,6 +6,12 @@ server:
       cookie:
         name: AUTH_SERVER_SESSION
 
+app:
+  security:
+    keystore-location: classpath:auth-server.p12
+    keystore-password: changeit
+    key-alias: oneidnepal-sig
+
 spring:
   application:
     name: auth-server
