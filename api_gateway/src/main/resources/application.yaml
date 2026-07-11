@@ -12,7 +12,7 @@ spring:
         - id: authorization-server
           uri: http://authorization-server:9000
           predicates:
-            - Path=/oauth2/**,/connect/**,/.well-known/**,/login/**,/logout/**,/userinfo/**, /api/auth/logout
+            - Path=/oauth2/**,/connect/**,/.well-known/**,/login/**,/logout/**,/userinfo/**, /api/auth/logout, /api/developer/**
           filters:
             - PreserveHostHeader
             - StripPrefix=0
