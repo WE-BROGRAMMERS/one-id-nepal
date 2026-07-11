@@ -1,6 +1,5 @@
 package com.oneidnepal.auth_server.config;
 
-import com.oneidnepal.auth_server.developer.repository.DeveloperAppRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
