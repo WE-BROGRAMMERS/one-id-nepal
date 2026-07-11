@@ -95,7 +95,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
-                                "/api/auth/logout", // Crucial that CSRF is ignored here for GET/POST
+                                "/api/auth/logout",
+                                "/api/developer/**",   // <-- bearer APIs don't need CSRF
                                 "/login",
                                 "/connect/logout"
                         )
@@ -117,6 +118,8 @@ public class SecurityConfig {
                         .failureUrl("/login?error")
                         .permitAll()
                 )
+                // <-- ADD THIS: makes the app chain accept Bearer JWTs
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .logout(logout -> logout
                         .logoutUrl("/connect/logout")
                         .logoutSuccessUrl("/login?logout")
