@@ -43,35 +43,37 @@ public class InitialDataConfig {
         );
 
         for (String userId : userIds) {
-            Person person = new Person();
-            person.setUserId(userId);
-            person.setFirstName("DummyFirstName");
-            person.setMiddleName("DummyMiddleName");
-            person.setLastName("DummyLastName");
-            person.setNepaliFirstName("नेपालीपहिलोनाम");
-            person.setNepaliMiddleName("नेपालीमध्यनाम");
-            person.setNepaliLastName("नेपालीअन्तिमनाम");
-            person.setDateOfBirth("2000-01-01");
-            person.setGender("Other");
-            person.setBloodGroup("O+");
-            person.setMartialStatus("Single");
-            person.setNationality("Nepali");
-            person.setProfilePhoto(null);
-            person.setFatherName("DummyFather");
-            person.setNepaliFatherName("नेपालीबाबु");
-            person.setMotherName("DummyMother");
-            person.setNepaliMotherName("नेपालीआमा");
-            person.setProvince("Province1");
-            person.setDistrict("District1");
-            person.setMunicipality("Municipality1");
-            person.setWardNo("1");
-            person.setTemporaryProvince("Province2");
-            person.setTemporaryDistrict("District2");
-            person.setTemporaryMunicipality("Municipality2");
-            person.setTemporaryWardNo("2");
-            person.setStatus(true);
+            if (!personRepository.existsByUserId(userId)) {
+                Person person = new Person();
+                person.setUserId(userId);
+                person.setFirstName("DummyFirstName");
+                person.setMiddleName("DummyMiddleName");
+                person.setLastName("DummyLastName");
+                person.setNepaliFirstName("नेपालीपहिलोनाम");
+                person.setNepaliMiddleName("नेपालीमध्यनाम");
+                person.setNepaliLastName("नेपालीअन्तिमनाम");
+                person.setDateOfBirth("2000-01-01");
+                person.setGender("Other");
+                person.setBloodGroup("O+");
+                person.setMartialStatus("Single");
+                person.setNationality("Nepali");
+                person.setProfilePhoto(null);
+                person.setFatherName("DummyFather");
+                person.setNepaliFatherName("नेपालीबाबु");
+                person.setMotherName("DummyMother");
+                person.setNepaliMotherName("नेपालीआमा");
+                person.setProvince("Province1");
+                person.setDistrict("District1");
+                person.setMunicipality("Municipality1");
+                person.setWardNo("1");
+                person.setTemporaryProvince("Province2");
+                person.setTemporaryDistrict("District2");
+                person.setTemporaryMunicipality("Municipality2");
+                person.setTemporaryWardNo("2");
+                person.setStatus(true);
 
-            personRepository.save(person);
+                personRepository.save(person);
+            }
         }
     }
 }

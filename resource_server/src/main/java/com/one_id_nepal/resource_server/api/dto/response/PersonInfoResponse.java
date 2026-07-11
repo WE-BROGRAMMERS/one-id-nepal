@@ -50,5 +50,19 @@ public class PersonInfoResponse {
         this.bloodGroup = person.getBloodGroup();
         this.martialStatus = person.getMartialStatus();
         this.nationality = person.getNationality();
+        this.profilePhoto = person.getProfilePhoto();
+        this.fatherName = person.getFatherName();
+        this.nepaliFatherName = person.getNepaliFatherName();
+        this.motherName = person.getMotherName();
+        this.nepaliMotherName = person.getNepaliMotherName();
+        this.province = person.getProvince();
+        this.district = person.getDistrict();
+        this.municipality = person.getMunicipality();
+        this.wardNo = person.getWardNo();
+        this.temporaryProvince = person.getTemporaryProvince();
+        this.temporaryDistrict = person.getTemporaryDistrict();
+        this.temporaryMunicipality = person.getTemporaryMunicipality();
+        this.temporaryWardNo = person.getTemporaryWardNo();
+        this.status = person.isStatus();
     }
 }
