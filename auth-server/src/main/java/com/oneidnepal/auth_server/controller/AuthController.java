@@ -19,6 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -36,9 +39,12 @@ public class AuthController {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtEncoder jwtEncoder;
+    private final RegisteredClientRepository registeredClientRepository;
 
     @Value("${spring.security.oauth2.authorizationserver.issuer:http://localhost:8080}")
     private String issuer;
+
+    private static final String DEFAULT_SCOPES = "openid profile citizenship_data";
 
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LoginRequest request,
@@ -54,9 +60,22 @@ public class AuthController {
         HttpSessionSecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
         contextRepository.saveContext(SecurityContextHolder.getContext(), httpRequest, httpResponse);
 
-        String scope = request.getScope() == null || request.getScope().isBlank()
-                ? "openid profile citizenship_data"
-                : request.getScope().trim();
+        // Determine scopes
+        String scopeString;
+        if (request.getClientId() != null && !request.getClientId().isBlank()) {
+            RegisteredClient client = registeredClientRepository.findByClientId(request.getClientId());
+            if (client == null) {
+                throw new RuntimeException("Client not found or inactive: " + request.getClientId());
+            }
+            Set<String> scopes = client.getScopes();
+            if (scopes == null || scopes.isEmpty()) {
+                throw new RuntimeException("Client has no scopes defined");
+            }
+            scopeString = String.join(" ", scopes);
+        } else {
+            // Fallback to static default or use request.getScope() if provided
+            scopeString = DEFAULT_SCOPES;
+        }
 
         User user = userRepository.findByPhoneNumber(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -69,8 +88,10 @@ public class AuthController {
                 .subject(user.getPhoneNumber())
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
-                .claim("scope", scope)
+                .claim("scope", scopeString)
                 .claim("userId", user.getId())
+                // optional: include clientId if known
+                .claim("clientId", request.getClientId() != null ? request.getClientId() : "unknown")
                 .build();
 
         String token = jwtEncoder.encode(
@@ -81,7 +102,7 @@ public class AuthController {
                 "access_token", token,
                 "token_type", "Bearer",
                 "expires_in", Duration.between(issuedAt, expiresAt).getSeconds(),
-                "scope", scope
+                "scope", scopeString
         );
     }
 
