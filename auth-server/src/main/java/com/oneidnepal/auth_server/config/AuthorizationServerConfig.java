@@ -1,7 +1,9 @@
 package com.oneidnepal.auth_server.config;
 
+import com.oneidnepal.auth_server.developer.repository.DeveloperAppRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -22,6 +24,7 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 
 import java.time.Duration;
 import java.util.UUID;
+
 
 @Configuration
 public class AuthorizationServerConfig {
@@ -53,8 +56,14 @@ public class AuthorizationServerConfig {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Raw JDBC-backed repository. Concrete return type so it can be injected
+     * by type into the @Primary decorator and into DeveloperAppServiceImpl,
+     * which deliberately bypasses the active-flag check to manage disabled apps.
+     * Bean name: "jdbcRegisteredClientRepository" (no collision with the decorator below).
+     */
     @Bean
-    public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcRegisteredClientRepository jdbcRegisteredClientRepository(JdbcTemplate jdbcTemplate) {
 
         JdbcRegisteredClientRepository repository = new JdbcRegisteredClientRepository(jdbcTemplate);
 
@@ -70,7 +79,7 @@ public class AuthorizationServerConfig {
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 
                     .redirectUri("http://localhost:4200/callback")
-                    .postLogoutRedirectUri( "http://localhost:4200/" )
+                    .postLogoutRedirectUri("http://localhost:4200/")
 
                     .scope("openid")
                     .scope("profile")
@@ -104,7 +113,7 @@ public class AuthorizationServerConfig {
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 
                     .redirectUri("http://localhost:4202/callback")
-                    .postLogoutRedirectUri( "http://localhost:4202/" )
+                    .postLogoutRedirectUri("http://localhost:4202/")
 
                     .scope("openid")
                     .scope("profile")
@@ -138,7 +147,7 @@ public class AuthorizationServerConfig {
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 
                     .redirectUri("http://localhost:4203/callback")
-                    .postLogoutRedirectUri( "http://localhost:4203/" )
+                    .postLogoutRedirectUri("http://localhost:4203/")
 
                     .scope("openid")
                     .scope("profile")
@@ -162,5 +171,19 @@ public class AuthorizationServerConfig {
         }
 
         return repository;
+    }
+
+    /**
+     * Primary repository seen by Spring Authorization Server and everything that
+     * autowires the RegisteredClientRepository interface. Wraps the raw JDBC
+     * repo so that apps marked inactive in developer_apps are invisible to the
+     * OAuth authorize/token flow.
+     */
+    @Bean
+    @Primary
+    public RegisteredClientRepository registeredClientRepository(
+            JdbcRegisteredClientRepository delegate,
+            DeveloperAppRepository developerAppRepository) {
+        return new ActiveAwareRegisteredClientRepository(delegate, developerAppRepository);
     }
 }
