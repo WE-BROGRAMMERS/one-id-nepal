@@ -76,6 +76,7 @@ public class AuthorizationServerConfig {
                     .scope("profile")
                     .scope("citizenship_data")
 
+
                     .clientSettings(ClientSettings.builder()
                             .requireAuthorizationConsent(true)
                             .requireProofKey(true)

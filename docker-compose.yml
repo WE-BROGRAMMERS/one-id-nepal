@@ -70,7 +70,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/idp_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
       SERVER_PORT: 9000
       RESOURCE_SERVICE_URL: http://resource-server:8090
     ports:
@@ -92,7 +92,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-resource:5432/idp_resource_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
       SERVER_PORT: 8090
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://authorization-server:9000/oauth2/jwks
       AUTH_SERVICE_URL: http://authorization-server:9000
