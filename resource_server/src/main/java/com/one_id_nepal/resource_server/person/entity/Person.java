@@ -1,9 +1,8 @@
 package com.one_id_nepal.resource_server.person.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.one_id_nepal.resource_server.citizenship.entity.Citizenship;
+import com.one_id_nepal.resource_server.nid.entity.NationalId;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,4 +43,11 @@ public class Person {
     private String temporaryWardNo;
     private boolean status;
     private String userId;
+
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Citizenship citizenship;
+
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    private NationalId nid;
+
 }
