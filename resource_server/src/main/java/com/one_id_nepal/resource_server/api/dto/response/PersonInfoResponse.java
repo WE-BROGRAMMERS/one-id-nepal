@@ -53,7 +53,7 @@ public class PersonInfoResponse {
         this.bloodGroup = person.getBloodGroup();
         this.martialStatus = person.getMartialStatus();
         this.nationality = person.getNationality();
-        this.profilePhoto = FileUrlUtil.getFileUri(person.getProfilePhoto());
+        this.profilePhoto = URI.create(person.getProfilePhoto());
         this.fatherName = person.getFatherName();
         this.nepaliFatherName = person.getNepaliFatherName();
         this.motherName = person.getMotherName();
