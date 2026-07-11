@@ -6,12 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.net.URI;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CitizenshipResponse {
     private String citizenshipId;
     private String citizenshipNumber;
+    private URI profilePhoto;
    private String fullName;
    private String nepaliFullName;
     private String dateOfBirth;
@@ -28,6 +31,7 @@ public class CitizenshipResponse {
     public CitizenshipResponse(Citizenship citizenship, Person person) {
         this.citizenshipId = citizenship.getCitizenshipId();
         this.citizenshipNumber = citizenship.getCitizenshipNumber();
+        this.profilePhoto = URI.create(person.getProfilePhoto());
         this.fullName = person.getFirstName() + " " + (person.getMiddleName() != null ? person.getMiddleName() + " " : "") + person.getLastName();
         this.nepaliFullName = person.getNepaliFirstName() + " " + (person.getNepaliMiddleName() != null ? person.getNepaliMiddleName() + " " : "") + person.getNepaliLastName();
         this.dateOfBirth = person.getDateOfBirth();
