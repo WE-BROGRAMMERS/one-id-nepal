@@ -21,11 +21,16 @@ public class ResourceServerConfig {
 
                         .requestMatchers(
                                 "/public/**",
-                                "/v1/**"
+                                "/v1/**",
+                                "/uploads/**", // Allow access to uploads
+                                "/one_id_nepal/**"
                         ).permitAll()
 
                         .requestMatchers("/api/res/citizen/**")
                         .hasAuthority("SCOPE_citizenship_data")
+
+                        .requestMatchers("/api/res/person/data")
+                        .hasAnyAuthority("SCOPE_citizenship_data", "SCOPE_nid_data", "SCOPE_citizenship_nid")
 
                         .requestMatchers("/api/res/person/**")
                         .hasAuthority("SCOPE_profile")

@@ -1,5 +1,7 @@
 package com.one_id_nepal.resource_server.config.init_db;
 
+import com.one_id_nepal.resource_server.citizenship.entity.Citizenship;
+import com.one_id_nepal.resource_server.nid.entity.NationalId;
 import com.one_id_nepal.resource_server.person.entity.Person;
 import com.one_id_nepal.resource_server.person.repository.PersonRepository;
 import jakarta.annotation.PostConstruct;
@@ -42,38 +44,66 @@ public class InitialDataConfig {
                 "6e01bfd2-0a12-43de-d123-777788889999"
         );
 
-        for (String userId : userIds) {
-            if (!personRepository.existsByUserId(userId)) {
-                Person person = new Person();
-                person.setUserId(userId);
-                person.setFirstName("DummyFirstName");
-                person.setMiddleName("DummyMiddleName");
-                person.setLastName("DummyLastName");
-                person.setNepaliFirstName("नेपालीपहिलोनाम");
-                person.setNepaliMiddleName("नेपालीमध्यनाम");
-                person.setNepaliLastName("नेपालीअन्तिमनाम");
-                person.setDateOfBirth("2000-01-01");
-                person.setGender("Other");
-                person.setBloodGroup("O+");
-                person.setMartialStatus("Single");
-                person.setNationality("Nepali");
-                person.setProfilePhoto(null);
-                person.setFatherName("DummyFather");
-                person.setNepaliFatherName("नेपालीबाबु");
-                person.setMotherName("DummyMother");
-                person.setNepaliMotherName("नेपालीआमा");
-                person.setProvince("Province1");
-                person.setDistrict("District1");
-                person.setMunicipality("Municipality1");
-                person.setWardNo("1");
-                person.setTemporaryProvince("Province2");
-                person.setTemporaryDistrict("District2");
-                person.setTemporaryMunicipality("Municipality2");
-                person.setTemporaryWardNo("2");
-                person.setStatus(true);
+        for (int i = 0; i < userIds.size(); i++) {
+            String userId = userIds.get(i);
 
-                personRepository.save(person);
+            // Check if Person with userId already exists
+            if (personRepository.findByUserId(userId).isPresent()) {
+                continue; // Skip if Person already exists
             }
+
+            Person person = new Person();
+            person.setUserId(userId);
+            person.setFirstName("DummyFirstName" + i);
+            person.setMiddleName("DummyMiddleName" + i);
+            person.setLastName("DummyLastName" + i);
+            person.setNepaliFirstName("नेपालीपहिलोनाम" + i);
+            person.setNepaliMiddleName("नेपालीमध्यनाम" + i);
+            person.setNepaliLastName("नेपालीअन्तिमनाम" + i);
+            person.setDateOfBirth("2000-01-01");
+            person.setGender("Other");
+            person.setBloodGroup("O+");
+            person.setMartialStatus("Single");
+            person.setNationality("Nepali");
+            person.setProfilePhoto(null);
+            person.setFatherName("DummyFather" + i);
+            person.setNepaliFatherName("नेपालीबाबु" + i);
+            person.setMotherName("DummyMother" + i);
+            person.setNepaliMotherName("नेपालीआमा" + i);
+            person.setProvince("Province1");
+            person.setDistrict("District1");
+            person.setMunicipality("Municipality1");
+            person.setWardNo("1");
+            person.setTemporaryProvince("Province2");
+            person.setTemporaryDistrict("District2");
+            person.setTemporaryMunicipality("Municipality2");
+            person.setTemporaryWardNo("2");
+            person.setStatus(true);
+
+            // Create and associate Citizenship
+            Citizenship citizenship = new Citizenship();
+            citizenship.setCitizenshipId("CIT-" + userId); // Assign a unique ID
+            citizenship.setCitizenshipNumber("CIT-" + userId.substring(0, 8)); // Unique citizenship number
+            citizenship.setIssuedDate("2023-01-01");
+            citizenship.setIssuedDistrict("District1");
+            citizenship.setPerson(person); // Associate with Person
+
+            // Create and associate NationalId
+            NationalId nationalId = new NationalId();
+            nationalId.setNID("NID-" + userId); // Assign a unique ID
+            nationalId.setNidNumber("NID-" + userId.substring(0, 8)); // Unique NID number
+            nationalId.setFatherNidNumber("FATHER-NID-" + i); // Ensure uniqueness
+            nationalId.setFatherCitizenshipNumber("FATHER-CIT-" + i); // Ensure uniqueness
+            nationalId.setMotherNidNumber("MOTHER-NID-" + i); // Ensure uniqueness
+            nationalId.setMotherCitizenshipNumber("MOTHER-CIT-" + i); // Ensure uniqueness
+            nationalId.setPerson(person); // Associate with Person
+
+            // Set Citizenship and NationalId in Person
+            person.setCitizenship(citizenship);
+            person.setNid(nationalId);
+
+            // Save Person (and associated entities due to CascadeType.ALL)
+            personRepository.save(person);
         }
     }
 }

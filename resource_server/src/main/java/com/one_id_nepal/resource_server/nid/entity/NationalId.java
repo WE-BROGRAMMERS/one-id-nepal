@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NationalId {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String nID;
 
     @Column(nullable = false, unique = true)

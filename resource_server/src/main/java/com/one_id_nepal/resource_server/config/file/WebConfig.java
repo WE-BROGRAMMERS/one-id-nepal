@@ -4,25 +4,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-
-/**
- * @author Utsab Dahal
- */
-
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final FileConfig fileConfig;
+    private final String filePath;
 
-    public WebConfig(FileConfig fileConfig) {
-        this.fileConfig = fileConfig;
+    public WebConfig(String filePath) {
+        this.filePath = filePath;
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String filePath = "file:" + fileConfig.getFilePath();
-        registry.addResourceHandler("/files/**")
-                .addResourceLocations(filePath)
-                .setCachePeriod(0); // No caching for development
+
+        String location = "file:";
+
+        if (!filePath.endsWith("/") && !filePath.endsWith("\\")) {
+            location += filePath + "/";
+        } else {
+            location += filePath;
+        }
+
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations(location)
+                .setCachePeriod(0);
+
+        System.out.println("Serving files from : " + location);
     }
 }

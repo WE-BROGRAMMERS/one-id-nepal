@@ -14,7 +14,7 @@ spring:
   jpa:
     show_sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
   security:
     oauth2:
@@ -30,9 +30,9 @@ server:
 
 app:
   filepath:
-    windows: D:\\one_id_nepal\\
-    linux: /home/user/one_id_nepal/
-    mac: /Users/one_id_nepal/
+    windows: D:\\uploads\\
+    linux: /home/user/uploads/
+    mac: /Users/uploads/
 
 logging:
   level:

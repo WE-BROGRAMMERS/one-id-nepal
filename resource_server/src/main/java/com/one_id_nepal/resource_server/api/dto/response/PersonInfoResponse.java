@@ -1,9 +1,12 @@
 package com.one_id_nepal.resource_server.api.dto.response;
 
 import com.one_id_nepal.resource_server.person.entity.Person;
+import com.one_id_nepal.resource_server.utils.FileUrlUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.net.URI;
 
 @Data
 @AllArgsConstructor
@@ -22,7 +25,7 @@ public class PersonInfoResponse {
     private String bloodGroup;
     private String martialStatus;
     private String nationality;
-    private String profilePhoto;
+    private URI profilePhoto;
     private String fatherName;
     private String nepaliFatherName;
     private String motherName;
@@ -50,7 +53,7 @@ public class PersonInfoResponse {
         this.bloodGroup = person.getBloodGroup();
         this.martialStatus = person.getMartialStatus();
         this.nationality = person.getNationality();
-        this.profilePhoto = person.getProfilePhoto();
+        this.profilePhoto = FileUrlUtil.getFileUri(person.getProfilePhoto());
         this.fatherName = person.getFatherName();
         this.nepaliFatherName = person.getNepaliFatherName();
         this.motherName = person.getMotherName();
