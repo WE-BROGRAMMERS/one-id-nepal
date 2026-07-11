@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,47 +27,6 @@ import java.util.stream.Collectors;
 public class PersonServiceImpl implements PersonService {
 
     private final PersonRepository personRepository;
-
-//    @Override
-//    public List<PersonInfoResponse> getAllPersons() {
-//        log.info("Fetching all persons from the database");
-//        return personRepository.findAll()
-//                .stream()
-//                .map(this::mapToPersonInfoResponse)
-//                .collect(Collectors.toList());
-//    }
-//
-//
-//    private PersonInfoResponse mapToPersonInfoResponse(Person person) {
-//        return new PersonInfoResponse(
-//                person.getPersonId(),
-//                person.getFirstName(),
-//                person.getMiddleName(),
-//                person.getLastName(),
-//                person.getNepaliFirstName(),
-//                person.getNepaliMiddleName(),
-//                person.getNepaliLastName(),
-//                person.getDateOfBirth(),
-//                person.getGender(),
-//                person.getBloodGroup(),
-//                person.getMartialStatus(),
-//                person.getNationality(),
-//                person.getProfilePhoto(),
-//                person.getFatherName(),
-//                person.getNepaliFatherName(),
-//                person.getMotherName(),
-//                person.getNepaliMotherName(),
-//                person.getProvince(),
-//                person.getDistrict(),
-//                person.getMunicipality(),
-//                person.getWardNo(),
-//                person.getTemporaryProvince(),
-//                person.getTemporaryDistrict(),
-//                person.getTemporaryMunicipality(),
-//                person.getTemporaryWardNo(),
-//                person.isStatus()
-//        );
-//    }
 
     @Override
     public PersonInfoResponse getUserInfo(@AuthenticationPrincipal Jwt jwt) {
@@ -106,48 +66,49 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Object getUserData(Jwt jwt) throws AccessDeniedException {
+    public Map<String, Object> getUserData(Jwt jwt) throws AccessDeniedException {
         String userId = jwt.getClaimAsString("userId");
-        String scope = jwt.getClaimAsString("scope");
+
+        // Safely extract scopes natively as a List (handles the JSON array format
+        // correctly)
+        List<String> scopes = jwt.getClaimAsStringList("scope");
+        if (scopes == null) {
+            scopes = List.of();
+        }
+
+        boolean hasCitizenshipScope = scopes.contains("citizenship_data");
+        boolean hasNidScope = scopes.contains("nid_data");
+
+        // Reject early if neither required scope is present
+        if (!hasCitizenshipScope && !hasNidScope) {
+            throw new AccessDeniedException(
+                    "Insufficient scope to access data. Required: citizenship_data or nid_data");
+        }
 
         // Fetch the Person entity
         Person person = personRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found for userId: " + userId));
 
-        // Check if the scope includes citizenship_data
-        if (scope != null && scope.contains("openid profile citizenship_data")) {
+        // Dynamically build the response based on the scopes the client actually holds
+        Map<String, Object> responseData = new HashMap<>();
+
+        if (hasCitizenshipScope) {
             Citizenship citizenship = person.getCitizenship();
             if (citizenship == null) {
-                throw new EntityNotFoundException("Citizenship not found for personId: " + person.getPersonId());
+                throw new EntityNotFoundException("Citizenship data not found for personId: " + person.getPersonId());
             }
-            return new CitizenshipResponse(citizenship, person);
-        } else if (scope != null && scope.contains("nid_data")) {
-            NationalId nationalId = person.getNid();
-            if (nationalId == null) {
-                throw new EntityNotFoundException("National ID not found for personId: " + person.getPersonId());
-            }
-            return new NidResponse(person, nationalId);
-        } else if (scope != null && scope.contains("citizenship_nid")) {
-            Citizenship citizenship = person.getCitizenship();
-            if (citizenship == null) {
-                throw new EntityNotFoundException("Citizenship not found for personId: " + person.getPersonId());
-            }
-            CitizenshipResponse citizenshipResponse = new CitizenshipResponse(citizenship, person);
-
-            NationalId nationalId = person.getNid();
-            if (nationalId == null) {
-                throw new EntityNotFoundException("National ID not found for personId: " + person.getPersonId());
-            }
-            NidResponse nidResponse = new NidResponse(person, nationalId);
-
-            return Map.of(
-                    "data", List.of(
-                            Map.of("citizenship", citizenshipResponse),
-                            Map.of("nid", nidResponse)
-                    )
-            );
-        } else {
-            throw new AccessDeniedException("Insufficient scope to access data");
+            responseData.put("citizenship", new CitizenshipResponse(citizenship, person));
         }
+
+        if (hasNidScope) {
+            NationalId nationalId = person.getNid();
+            if (nationalId == null) {
+                throw new EntityNotFoundException("National ID data not found for personId: " + person.getPersonId());
+            }
+            responseData.put("nid", new NidResponse(person, nationalId));
+        }
+
+        // Return a consistent JSON structure wrapped in "data"
+        return Map.of("data", responseData);
     }
 }

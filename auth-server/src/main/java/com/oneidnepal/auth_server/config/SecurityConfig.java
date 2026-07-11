@@ -6,6 +6,9 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.oneidnepal.auth_server.repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -33,14 +36,25 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.io.InputStream;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    @Value("${app.security.keystore-location}")
+    private Resource keystoreLocation;
+
+    @Value("${app.security.keystore-password}")
+    private String keystorePassword;
+
+    @Value("${app.security.key-alias}")
+    private String keyAlias;
+
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -170,23 +184,22 @@ public class SecurityConfig {
 
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
-        RSAKey rsaKey = generateRsaKey();
-        JWKSet jwkSet = new JWKSet(rsaKey);
-        return new ImmutableJWKSet<>(jwkSet);
-    }
-
-    private static RSAKey generateRsaKey() {
         try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(2048);
-            KeyPair keyPair = generator.generateKeyPair();
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            try (InputStream inputStream = keystoreLocation.getInputStream()) {
+                keyStore.load(inputStream, keystorePassword.toCharArray());
+            }
 
-            return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
-                    .privateKey((RSAPrivateKey) keyPair.getPrivate())
-                    .keyID("oneidnepal-sig-2026-01")   // for now static stable kid
+            RSAKey rsaKey = RSAKey.load(keyStore, keyAlias, keystorePassword.toCharArray());
+            // Force the stable keyID you want to present in the JWKS endpoint
+            RSAKey extendedRsaKey = new RSAKey.Builder(rsaKey)
+                    .keyID("oneidnepal-sig-2026-01")
                     .build();
+
+            JWKSet jwkSet = new JWKSet(extendedRsaKey);
+            return new ImmutableJWKSet<>(jwkSet);
         } catch (Exception ex) {
-            throw new IllegalStateException("Failed to generate RSA key", ex);
+            throw new IllegalStateException("Failed to load persistent keystore", ex);
         }
     }
 

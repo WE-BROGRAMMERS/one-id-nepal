@@ -30,7 +30,7 @@ public class ResourceServerConfig {
                         .hasAuthority("SCOPE_citizenship_data")
 
                         .requestMatchers("/api/res/person/data")
-                        .hasAnyAuthority("SCOPE_citizenship_data", "SCOPE_nid_data", "SCOPE_citizenship_nid")
+                        .hasAnyAuthority("SCOPE_citizenship_data", "SCOPE_nid_data", "SCOPE_profile", "SCOPE_openid")
 
                         .requestMatchers("/api/res/person/**")
                         .hasAuthority("SCOPE_profile")

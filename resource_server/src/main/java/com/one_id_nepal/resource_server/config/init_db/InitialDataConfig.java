@@ -17,6 +17,16 @@ public class InitialDataConfig {
 
     private final PersonRepository personRepository;
 
+    // Helper record to hold diverse, realistic Nepali test data
+    private record NpProfile(
+            String firstEn, String midEn, String lastEn,
+            String firstNp, String midNp, String lastNp,
+            String gender, String dob, String bloodGroup, String marital,
+            String fatherEn, String fatherNp,
+            String motherEn, String motherNp,
+            String province, String district, String municipality, String ward
+    ) {}
+
     @PostConstruct
     public void initData() {
         List<String> userIds = Arrays.asList(
@@ -44,67 +54,99 @@ public class InitialDataConfig {
                 "6e01bfd2-0a12-43de-d123-777788889999"
         );
 
-        String defaultAvatarUrl = "https://static.vecteezy.com/system/resources/thumbnails/048/216/761/small/modern-male-avatar-with-black-hair-and-hoodie-illustration-free-png.png";
+        // 10 distinct profiles covering different regions, ethnicities, and genders of Nepal
+        List<NpProfile> profiles = Arrays.asList(
+                new NpProfile("Aarav", "Prasad", "Sharma", "आरभ", "प्रसाद", "शर्मा", "Male", "1995-05-14", "O+", "Single", "Ram Prasad Sharma", "राम प्रसाद शर्मा", "Sita Devi Sharma", "सीता देवी शर्मा", "Bagmati", "Kathmandu", "Kathmandu Metropolitan", "10"),
+                new NpProfile("Sunita", "", "Maharjan", "सुनिता", "", "महर्जन", "Female", "1998-11-22", "A+", "Married", "Bhairav Maharjan", "भैरव महर्जन", "Laxmi Maharjan", "लक्ष्मी महर्जन", "Bagmati", "Lalitpur", "Lalitpur Metropolitan", "15"),
+                new NpProfile("Rakesh", "Kumar", "Yadav", "राकेश", "कुमार", "यादव", "Male", "1990-02-10", "B+", "Married", "Shyam Sundar Yadav", "श्याम सुन्दर यादव", "Anita Devi Yadav", "अनिता देवी यादव", "Madhesh", "Dhanusha", "Janakpur Sub-Metropolitan", "4"),
+                new NpProfile("Pasang", "Lhamu", "Sherpa", "पासाङ", "ल्हामु", "शेर्पा", "Female", "2001-08-30", "O-", "Single", "Dorje Sherpa", "दोर्जे शेर्पा", "Mingma Sherpa", "मिङ्मा शेर्पा", "Koshi", "Solukhumbu", "Solu Dudhkunda", "2"),
+                new NpProfile("Bikash", "", "Tharu", "विकास", "", "थारु", "Male", "1993-12-05", "AB+", "Single", "Ramdin Tharu", "रामदिन थारु", "Kamala Tharu", "कमला थारु", "Lumbini", "Banke", "Nepalgunj Sub-Metropolitan", "8"),
+                new NpProfile("Sumnima", "", "Rai", "सुम्निमा", "", "राई", "Female", "1997-04-18", "A-", "Married", "Kiran Rai", "किरण राई", "Parbati Rai", "पार्वती राई", "Koshi", "Ilam", "Ilam Municipality", "5"),
+                new NpProfile("Ramesh", "Bahadur", "Karki", "रमेश", "बहादुर", "कार्की", "Male", "1988-09-25", "O+", "Married", "Bhim Bahadur Karki", "भिम बहादुर कार्की", "Radha Karki", "राधा कार्की", "Karnali", "Surkhet", "Birendranagar", "6"),
+                new NpProfile("Bishnu", "Maya", "Kami", "विष्णु", "माया", "कामी", "Female", "1992-07-12", "B-", "Divorced", "Hira Lal Kami", "हिरा लाल कामी", "Tulasi Maya Kami", "तुलसी माया कामी", "Gandaki", "Kaski", "Pokhara Metropolitan", "17"),
+                new NpProfile("Abdul", "Rahman", "Ansari", "अब्दुल", "रहमान", "अन्सारी", "Male", "1996-03-08", "A+", "Single", "Mohammad Ansari", "मोहमद अन्सारी", "Fatima Khatun", "फातिमा खातुन", "Lumbini", "Kapilvastu", "Taulihawa", "3"),
+                new NpProfile("Kritika", "", "Shrestha", "कृतिका", "", "श्रेष्ठ", "Female", "2003-01-20", "B+", "Single", "Sanjeev Shrestha", "संजिव श्रेष्ठ", "Anju Shrestha", "अन्जु श्रेष्ठ", "Bagmati", "Bhaktapur", "Bhaktapur Municipality", "9")
+        );
+
+        String defaultMaleAvatar = "https://static.vecteezy.com/system/resources/thumbnails/048/216/761/small/modern-male-avatar-with-black-hair-and-hoodie-illustration-free-png.png";
+        String defaultFemaleAvatar = "https://cdn3d.iconscout.com/3d/premium/thumb/woman-avatar-6299541-5187873.png";
 
         for (int i = 0; i < userIds.size(); i++) {
             String userId = userIds.get(i);
 
-            // Check if Person with userId already exists
             if (personRepository.findByUserId(userId).isPresent()) {
-                continue; // Skip if Person already exists
+                continue;
             }
+
+            // Loop through the 10 realistic profiles
+            NpProfile p = profiles.get(i % profiles.size());
 
             Person person = new Person();
             person.setUserId(userId);
-            person.setFirstName("DummyFirstName" + i);
-            person.setMiddleName("DummyMiddleName" + i);
-            person.setLastName("DummyLastName" + i);
-            person.setNepaliFirstName("नेपालीपहिलोनाम" + i);
-            person.setNepaliMiddleName("नेपालीमध्यनाम" + i);
-            person.setNepaliLastName("नेपालीअन्तिमनाम" + i);
-            person.setDateOfBirth("2000-01-01");
-            person.setGender("Other");
-            person.setBloodGroup("O+");
-            person.setMartialStatus("Single");
+
+            // Name (English)
+            person.setFirstName(p.firstEn());
+            person.setMiddleName(p.midEn());
+            person.setLastName(p.lastEn());
+
+            // Name (Nepali)
+            person.setNepaliFirstName(p.firstNp());
+            person.setNepaliMiddleName(p.midNp());
+            person.setNepaliLastName(p.lastNp());
+
+            // Demographics
+            person.setDateOfBirth(p.dob());
+            person.setGender(p.gender());
+            person.setBloodGroup(p.bloodGroup());
+            person.setMartialStatus(p.marital()); // Keeping your exact method name
             person.setNationality("Nepali");
-            person.setProfilePhoto(defaultAvatarUrl);
-            person.setFatherName("DummyFather" + i);
-            person.setNepaliFatherName("नेपालीबाबु" + i);
-            person.setMotherName("DummyMother" + i);
-            person.setNepaliMotherName("नेपालीआमा" + i);
-            person.setProvince("Province1");
-            person.setDistrict("District1");
-            person.setMunicipality("Municipality1");
-            person.setWardNo("1");
-            person.setTemporaryProvince("Province2");
-            person.setTemporaryDistrict("District2");
-            person.setTemporaryMunicipality("Municipality2");
-            person.setTemporaryWardNo("2");
+            person.setProfilePhoto(p.gender().equals("Male") ? defaultMaleAvatar : defaultFemaleAvatar);
+
+            // Parents (English & Nepali)
+            person.setFatherName(p.fatherEn());
+            person.setNepaliFatherName(p.fatherNp());
+            person.setMotherName(p.motherEn());
+            person.setNepaliMotherName(p.motherNp());
+
+            // Permanent Address
+            person.setProvince(p.province());
+            person.setDistrict(p.district());
+            person.setMunicipality(p.municipality());
+            person.setWardNo(p.ward());
+
+            // Temporary Address (Simulating urban migration for some users)
+            boolean migrated = i % 2 == 0;
+            person.setTemporaryProvince(migrated ? "Bagmati" : p.province());
+            person.setTemporaryDistrict(migrated ? "Kathmandu" : p.district());
+            person.setTemporaryMunicipality(migrated ? "Kathmandu Metropolitan" : p.municipality());
+            person.setTemporaryWardNo(migrated ? "10" : p.ward());
+
             person.setStatus(true);
 
-            // Create and associate Citizenship
+            // Create and associate Citizenship (Realistic Formats)
             Citizenship citizenship = new Citizenship();
-            citizenship.setCitizenshipId("CIT-" + userId); // Assign a unique ID
-            citizenship.setCitizenshipNumber("CIT-" + userId.substring(0, 8)); // Unique citizenship number
-            citizenship.setIssuedDate("2023-01-01");
-            citizenship.setIssuedDistrict("District1");
-            citizenship.setPerson(person); // Associate with Person
+            citizenship.setCitizenshipId("CIT-" + userId);
+            // e.g., KAS-27-01-79-1234
+            String formattedCitNo = p.district().substring(0, 3).toUpperCase() + "-27-01-79-" + (1000 + i);
+            citizenship.setCitizenshipNumber(formattedCitNo);
+            citizenship.setIssuedDate("2015-04-1" + (i % 9)); // Randomize day a bit
+            citizenship.setIssuedDistrict(p.district());
+            citizenship.setPerson(person);
 
-            // Create and associate NationalId
+            // Create and associate NationalId (Realistic Formats)
             NationalId nationalId = new NationalId();
-            nationalId.setNID("NID-" + userId); // Assign a unique ID
-            nationalId.setNidNumber("NID-" + userId.substring(0, 8)); // Unique NID number
-            nationalId.setFatherNidNumber("FATHER-NID-" + i); // Ensure uniqueness
-            nationalId.setFatherCitizenshipNumber("FATHER-CIT-" + i); // Ensure uniqueness
-            nationalId.setMotherNidNumber("MOTHER-NID-" + i); // Ensure uniqueness
-            nationalId.setMotherCitizenshipNumber("MOTHER-CIT-" + i); // Ensure uniqueness
-            nationalId.setPerson(person); // Associate with Person
+            nationalId.setNID("NID-" + userId);
+            // e.g., 1004-5678-9012
+            nationalId.setNidNumber(String.format("100%d-%04d-%04d", i % 9, 1000 + i, 5000 + i));
+            nationalId.setFatherNidNumber(String.format("100%d-%04d-%04d", i % 9, 2000 + i, 6000 + i));
+            nationalId.setFatherCitizenshipNumber("CIT-F-" + (8000 + i));
+            nationalId.setMotherNidNumber(String.format("100%d-%04d-%04d", i % 9, 3000 + i, 7000 + i));
+            nationalId.setMotherCitizenshipNumber("CIT-M-" + (9000 + i));
+            nationalId.setPerson(person);
 
-            // Set Citizenship and NationalId in Person
             person.setCitizenship(citizenship);
             person.setNid(nationalId);
 
-            // Save Person (and associated entities due to CascadeType.ALL)
             personRepository.save(person);
         }
     }
