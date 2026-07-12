@@ -3,6 +3,7 @@ package com.one_id_nepal.resource_server.api.service.service_impl;
 import com.one_id_nepal.resource_server.api.dto.response.CitizenshipResponse;
 import com.one_id_nepal.resource_server.api.dto.response.NidResponse;
 import com.one_id_nepal.resource_server.api.dto.response.PersonInfoResponse;
+import com.one_id_nepal.resource_server.api.dto.response.ProfileResponse;
 import com.one_id_nepal.resource_server.api.service.PersonService;
 import com.one_id_nepal.resource_server.citizenship.entity.Citizenship;
 import com.one_id_nepal.resource_server.nid.entity.NationalId;
@@ -78,11 +79,12 @@ public class PersonServiceImpl implements PersonService {
 
         boolean hasCitizenshipScope = scopes.contains("citizenship_data");
         boolean hasNidScope = scopes.contains("nid_data");
+        boolean hasProfile = scopes.contains("profile");
 
         // Reject early if neither required scope is present
-        if (!hasCitizenshipScope && !hasNidScope) {
+        if (!hasCitizenshipScope && !hasNidScope  && !hasProfile) {
             throw new AccessDeniedException(
-                    "Insufficient scope to access data. Required: citizenship_data or nid_data");
+                    "Insufficient scope to access data. Required: citizenship_data or nid_data or basic profile");
         }
 
         // Fetch the Person entity
@@ -91,6 +93,14 @@ public class PersonServiceImpl implements PersonService {
 
         // Dynamically build the response based on the scopes the client actually holds
         Map<String, Object> responseData = new HashMap<>();
+
+        if (hasProfile) {
+            Citizenship citizenship = person.getCitizenship();
+            if (citizenship == null) {
+                throw new EntityNotFoundException("Citizenship not found for personId: " + person.getPersonId());
+            }
+            responseData.put("profile", new ProfileResponse(person));
+        }
 
         if (hasCitizenshipScope) {
             Citizenship citizenship = person.getCitizenship();
