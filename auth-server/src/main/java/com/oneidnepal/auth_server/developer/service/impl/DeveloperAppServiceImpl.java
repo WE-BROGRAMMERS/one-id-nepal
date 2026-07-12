@@ -63,8 +63,8 @@ public class DeveloperAppServiceImpl implements DeveloperAppService {
     private static final char[] BASE62 =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
-    private static final Set<String> SELF_SERVICE_SCOPES = Set.of("openid", "profile", "email");
-    private static final Set<String> RESTRICTED_SCOPES = Set.of("citizenship_data", "driving_license", "nid_data");
+    private static final Set<String> SELF_SERVICE_SCOPES = Set.of("openid", "profile");
+    private static final Set<String> RESTRICTED_SCOPES = Set.of();
 
     @Override
     @Transactional
@@ -95,7 +95,6 @@ public class DeveloperAppServiceImpl implements DeveloperAppService {
                         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                         .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
                         .build());
-
         if (confidential) {
             builder.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                     .clientSecret(passwordEncoder.encode(rawSecret));
