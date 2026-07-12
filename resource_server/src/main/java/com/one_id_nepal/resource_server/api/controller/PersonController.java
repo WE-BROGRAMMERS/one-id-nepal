@@ -20,26 +20,6 @@ import java.util.List;
 public class PersonController {
 
     private final PersonService personService;
-//    private final PersonRepository personRepository;
-//
-//    @GetMapping("/all")
-//    public ResponseEntity<List<PersonInfoResponse>> getAllPersons() {
-//        return ResponseEntity.ok(personService.getAllPersons());
-//    }
-//
-//    @GetMapping("/me")
-//    public ResponseEntity<PersonInfoResponse> getPersonFromToken(
-//            @AuthenticationPrincipal Jwt jwt) {
-//
-//        String userId = jwt.getClaimAsString("userId");
-//
-//        Person person = personRepository
-//                .findByUserId(userId)
-//                .orElseThrow(() ->
-//                        new RuntimeException("Person not found"));
-//
-//        return ResponseEntity.ok(new PersonInfoResponse(person));
-//    }
 
     @GetMapping("/user")
     public ResponseEntity<PersonInfoResponse> getUserInfo(@AuthenticationPrincipal Jwt jwt) {
