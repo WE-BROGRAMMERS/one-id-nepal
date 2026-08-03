@@ -1,0 +1,36 @@
+server:
+  port: 9000
+  forward-headers-strategy: framework  # Crucial for reading Gateway headers correctly
+  servlet:
+    session:
+      cookie:
+        name: AUTH_SERVER_SESSION
+
+app:
+  security:
+    keystore-location: classpath:auth-server.p12
+    keystore-password: changeit
+    key-alias: oneidnepal-sig
+
+spring:
+  application:
+    name: auth-server
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/idp_db
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  thymeleaf:
+    cache: false
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    hibernate:
+      ddl-auto: none # Temporarily set to none or update so it doesn't overwrite script
+    defer-datasource-initialization: false # CRITICAL: Forces script to run BEFORE Hibernate
+    show-sql: true
+

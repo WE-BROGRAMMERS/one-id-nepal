@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: resource_server
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/resource_db
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+    hikari:
+      auto-commit: false
+
+  jpa:
+    show_sql: true
+    hibernate:
+      ddl-auto: update
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+#          issuer-uri: http://localhost:8080
+          # issuer-uri: http://localhost:8080   # Your IdP's issuer
+          jwk-set-uri: http://authorization-server:9000/oauth2/jwks
+          jws-algorithms: RS256
+
+server:
+  port: 8090
+
+app:
+  filepath:
+    windows: D:\\uploads\\
+    linux: /home/user/uploads/
+    mac: /Users/uploads/
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v1/api-docs
+    enabled: true
+  swagger-ui:
+    path: /v1/swagger.html
